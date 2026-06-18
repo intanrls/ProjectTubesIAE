@@ -1,0 +1,24 @@
+type Inventory {
+    id: ID!
+    nama_barang: String!
+    stok: Int!
+    status_qc: String!
+    kondisi_barang: String!
+}
+
+type QCResponse {
+    status: String!
+    message: String!
+    order_id: Int!
+    qc_status: String!
+    notes: String
+}
+
+type Query {
+    listInventories: [Inventory!]! @all(model: "App\\Models\\Inventory")
+    detailInventory(id: ID! @eq): Inventory @find(model: "App\\Models\\Inventory")
+}
+
+type Mutation {
+    storeQC(order_id: Int!, qc_status: String!, notes: String): QCResponse!
+}

@@ -1,0 +1,152 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Expedition Service API",
+        "description": "REST & GraphQL API untuk Expedition Service (Meilisya Nabila Siregar) berbasis Laravel. Seluruh endpoint diamankan menggunakan API Key melalui header X-IAE-KEY.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Local Development Server"
+        }
+    ],
+    "paths": {
+        "/api/v1/expeditions": {
+            "get": {
+                "tags": [
+                    "Expedition Service"
+                ],
+                "summary": "Melihat daftar semua pengiriman",
+                "operationId": "ff91f42251696d7fccaa7956eedcf5fd",
+                "responses": {
+                    "200": {
+                        "description": "Data retrieved successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Expedition Service"
+                ],
+                "summary": "Membuat data pengiriman baru",
+                "operationId": "38932384dcca80f41bdfc1592442d6d8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "order_id",
+                                    "customer_name",
+                                    "customer_address",
+                                    "courier_name",
+                                    "tracking_number"
+                                ],
+                                "properties": {
+                                    "order_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "customer_name": {
+                                        "type": "string",
+                                        "example": "Meilisya Nabila"
+                                    },
+                                    "customer_address": {
+                                        "type": "string",
+                                        "example": "Jl. Buah Batu No. 1, Bandung"
+                                    },
+                                    "courier_name": {
+                                        "type": "string",
+                                        "example": "JNE"
+                                    },
+                                    "tracking_number": {
+                                        "type": "string",
+                                        "example": "EXP-2026-001"
+                                    },
+                                    "shipping_status": {
+                                        "type": "string",
+                                        "example": "processing"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Expedition created successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/expeditions/{id}": {
+            "get": {
+                "tags": [
+                    "Expedition Service"
+                ],
+                "summary": "Melihat detail pengiriman berdasarkan ID",
+                "operationId": "8ef9d9c29a01f66f048f6be3535ba81f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data retrieved successfully"
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "ApiKeyAuth": {
+                "type": "apiKey",
+                "description": "API Key menggunakan NIM Anda",
+                "name": "X-IAE-KEY",
+                "in": "header"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Expedition Service",
+            "description": "Expedition Service"
+        }
+    ]
+}

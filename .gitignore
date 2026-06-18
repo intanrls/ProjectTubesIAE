@@ -1,0 +1,29 @@
+# Ignore environment files
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+
+# Ignore vendor and node_modules in all subdirectories
+**/vendor/
+**/node_modules/
+**/npm-debug.log*
+**/yarn-error.log*
+
+# Ignore SQLite databases in all subdirectories
+**/database/*.sqlite
+**/database/*.sqlite-journal
+**/database/*.sqlite3
+
+# Ignore IDE files and system logs
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+Thumbs.db
+ehthumbs.db
+Desktop.ini

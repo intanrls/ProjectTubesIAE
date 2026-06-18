@@ -1,0 +1,140 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Inventory Service API Documentation",
+        "description": "Dokumentasi Kontrak Tugas 2 - Ekosistem Fulfillment - Inventory Service (Dhika)",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Localhost Server Utama"
+        }
+    ],
+    "paths": {
+        "/api/v1/inventories": {
+            "get": {
+                "tags": [
+                    "Inventory Management"
+                ],
+                "summary": "Melihat daftar barang yang tersedia di gudang",
+                "operationId": "ea8059b0b4b0d99032f7106b6f55623e",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil daftar barang"
+                    },
+                    "401": {
+                        "description": "Unauthenticated / API Key Salah atau Tidak Ada"
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/inventories/{id}": {
+            "get": {
+                "tags": [
+                    "Inventory Management"
+                ],
+                "summary": "Mengambil detail barang dan mengecek ketersediaan stok",
+                "operationId": "df51d383e2d50eda2fecbb052f9f61e4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID unik barang",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail data ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthenticated / API Key Salah atau Tidak Ada"
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/inventories/qc": {
+            "post": {
+                "tags": [
+                    "Quality Control"
+                ],
+                "summary": "Memproses barang order sekaligus mencatat hasil QC",
+                "operationId": "cf0b5021671a394e37b041f650bb1975",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "order_id",
+                                    "qc_status"
+                                ],
+                                "properties": {
+                                    "order_id": {
+                                        "type": "integer",
+                                        "example": 101
+                                    },
+                                    "qc_status": {
+                                        "type": "string",
+                                        "example": "PASSED"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Barang aman pas sesuai pesanan"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Hasil QC berhasil dicatat"
+                    },
+                    "401": {
+                        "description": "Unauthenticated / API Key Salah atau Tidak Ada"
+                    }
+                },
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "ApiKeyAuth": {
+                "type": "apiKey",
+                "name": "X-IAE-KEY",
+                "in": "header"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Inventory Management",
+            "description": "Inventory Management"
+        },
+        {
+            "name": "Quality Control",
+            "description": "Quality Control"
+        }
+    ]
+}

@@ -1,0 +1,14 @@
+type Expedition {
+    id: ID!
+    order_id: Int!
+    customer_name: String!
+    customer_address: String!
+    courier_name: String!
+    tracking_number: String!
+    shipping_status: String!
+}
+
+type Query {
+    expeditions: [Expedition!]! @all
+    expedition(id: ID! @eq): Expedition @find
+}
