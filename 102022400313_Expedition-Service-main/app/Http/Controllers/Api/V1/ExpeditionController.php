@@ -106,9 +106,9 @@ responses: [
     requestBody: new OA\RequestBody(
         required: true,
         content: new OA\JsonContent(
-            required: ["order_id", "customer_name", "customer_address", "courier_name", "tracking_number"],
+            required: ["order_id", "customer_name", "customer_address", "courier_name"],
             properties: [
-                new OA\Property(property: "order_id", type: "integer", example: 1),
+                new OA\Property(property: "order_id", type: "string", example: "ORD-001", description: "ID Order dari Order Service (format: ORD-XXX)"),
                 new OA\Property(property: "customer_name", type: "string", example: "Meilisya Nabila"),
                 new OA\Property(property: "customer_address", type: "string", example: "Jl. Buah Batu No. 1, Bandung"),
                 new OA\Property(property: "courier_name", type: "string", example: "JNE"),
@@ -126,13 +126,25 @@ responses: [
 public function store(Request $request)
 {
     $validated = $request->validate([
-        'order_id' => 'required|integer',
-        'customer_name' => 'required|string|max:255',
-        'customer_address' => 'required|string',
-        'courier_name' => 'required|string|max:255',
-        'tracking_number' => 'required|string|max:255|unique:expeditions,tracking_number',
-        'shipping_status' => 'nullable|string|max:255',
+        'order_id'       => 'required',
+        'customer_name'  => 'required|string|max:255',
+        'customer_address'=> 'required|string',
+        'courier_name'   => 'required|string|max:255',
+        'tracking_number'=> 'nullable|string|max:255|unique:expeditions,tracking_number',
+        'shipping_status'=> 'nullable|string|max:255',
     ]);
+
+    // Normalisasi order_id: jika integer (misal 1), ubah ke format ORD-001
+    $rawOrderId = $validated['order_id'];
+    if (is_numeric($rawOrderId)) {
+        $validated['order_id'] = 'ORD-' . str_pad((int) $rawOrderId, 3, '0', STR_PAD_LEFT);
+    } else {
+        $validated['order_id'] = strtoupper(trim($rawOrderId));
+    }
+
+    if (empty($validated['tracking_number'])) {
+        $validated['tracking_number'] = 'TRK-IAE-' . strtoupper(bin2hex(random_bytes(4)));
+    }
 
     $expedition = Expedition::create($validated);
 
@@ -140,6 +152,10 @@ public function store(Request $request)
 
     $receiptNumber = $iaeCloud->sendSoapAudit($expedition->toArray());
     $rabbitPublished = $iaeCloud->publishRabbitMq($expedition->toArray());
+
+    if ($receiptNumber) {
+        $expedition->update(['receipt_number' => $receiptNumber]);
+    }
 
     return response()->json([
         'status' => 'success',

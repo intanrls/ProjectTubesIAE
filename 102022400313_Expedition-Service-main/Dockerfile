@@ -14,6 +14,8 @@ WORKDIR /app
 COPY . .
 
 RUN composer install
+RUN php artisan l5-swagger:generate
+RUN mkdir -p /app/database && touch /app/database/database.sqlite
 
 EXPOSE 8000
 

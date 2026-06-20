@@ -48,6 +48,18 @@ class ProcessInventoryMessage implements ShouldQueue
             
             // 3. Tambahan: Jika perlu integrasi RabbitMQ (Modul 3), 
             // Anda bisa memanggil function publisher di sini.
+            $iaeCloud = app(\App\Services\IaeCloudService::class);
+            
+            $rabbitPayload = [
+                'event' => 'InventoryStockUpdate',
+                'team_id' => 'TEAM-03',
+                'inventory_id' => (int) ($this->data['inventory_id'] ?? 1),
+                'quantity' => (int) ($this->data['quantity'] ?? 50),
+                'receipt' => $receiptNumber,
+                'timestamp' => now()->toIso8601String()
+            ];
+
+            $iaeCloud->publishRabbitMq('inventory.stock.updated', $rabbitPayload);
             
             Log::info('--- Job Berhasil Diproses ---');
 

@@ -7,13 +7,11 @@ use Exception;
 
 class CentralIntegrationService
 {
-    /**
-     * Mengambil Token M2M menggunakan API Key.
-     */
     public static function getM2mToken()
     {
         $response = Http::post('https://iae-sso.virtualfri.id/api/v1/auth/token', [
-            'api_key' => config('services.central.api_key', 'KEY-MHS-50')
+            'api_key' => config('services.central.api_key', 'KEY-MHS-50'),
+            'nim' => config('services.central.api_key_local', '102022400005')
         ]);
 
         if ($response->failed()) {

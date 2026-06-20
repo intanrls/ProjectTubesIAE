@@ -15,5 +15,6 @@ class Expedition extends Model
         'shipping_status',
         'shipped_at',
         'delivered_at',
+        'receipt_number',
     ];
 }

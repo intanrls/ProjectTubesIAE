@@ -13,7 +13,7 @@ return new class extends Migration
 {
     Schema::create('expeditions', function (Blueprint $table) {
         $table->id();
-        $table->unsignedBigInteger('order_id');
+        $table->string('order_id');
         $table->string('customer_name');
         $table->text('customer_address');
         $table->string('courier_name');
@@ -21,6 +21,7 @@ return new class extends Migration
         $table->string('shipping_status')->default('processing');
         $table->timestamp('shipped_at')->nullable();
         $table->timestamp('delivered_at')->nullable();
+        $table->string('receipt_number')->nullable();
         $table->timestamps();
     });
 }

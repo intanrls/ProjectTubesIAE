@@ -25,7 +25,12 @@ COPY . .
 # Running composer install to populate vendor directory
 RUN composer install --no-interaction --no-dev --optimize-autoloader
 
-# Set permission (Penting untuk Laravel)
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Generate Swagger UI documentation
+RUN php artisan l5-swagger:generate
+
+# Buat database sqlite kosong dan migrate+seed agar data awal terisi ke dalam image
+RUN mkdir -p /var/www/html/database && touch /var/www/html/database/database.sqlite
+RUN php artisan migrate:fresh --seed
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
 EXPOSE 80

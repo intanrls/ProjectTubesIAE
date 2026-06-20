@@ -28,8 +28,9 @@ COPY . .
 # Buat autoload composer yang dioptimalkan
 RUN composer dump-autoload --optimize
 
-# Atur kepemilikan berkas agar dapat diakses Nginx dan PHP-FPM
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Buat database sqlite kosong dan atur kepemilikan berkas agar dapat diakses Nginx dan PHP-FPM
+RUN mkdir -p /var/www/html/database && touch /var/www/html/database/database.sqlite
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
 # Ekspos port 3000
 EXPOSE 3000

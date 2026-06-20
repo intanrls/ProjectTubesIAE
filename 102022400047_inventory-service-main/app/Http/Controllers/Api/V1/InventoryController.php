@@ -77,60 +77,105 @@ class InventoryController extends Controller
     /**
      * @OA\Post(
      * path="/api/v1/inventories/qc",
-     * summary="Proses QC Barang",
+     * summary="Memproses barang order sekaligus mencatat hasil QC",
      * security={{"bearerAuth":{}}},
-     * @OA\Response(response=201, description="QC Berhasil diproses")
+     * @OA\RequestBody(
+     *   required=true,
+     *   @OA\JsonContent(
+     *     required={"order_id","qc_status"},
+     *     @OA\Property(property="order_id", type="string", example="ORD-001", description="ID Order dari Order Service (format: ORD-XXX)"),
+     *     @OA\Property(property="qc_status", type="string", example="PASSED", description="Status QC: PASSED atau FAILED"),
+     *     @OA\Property(property="notes", type="string", example="Barang lolos inspeksi, kondisi mulus sesuai pesanan")
+     *   )
+     * ),
+     * @OA\Response(response=201, description="QC Berhasil dicatat"),
+     * @OA\Response(response=400, description="Request tidak valid"),
+     * @OA\Response(response=401, description="Unauthorized")
      * )
      */
     public function storeQC(Request $request)
     {
-        $orderId = $request->input('order_id', 101);
-        $qcStatus = $request->input('qc_status', 'PASSED');
-        $notes = $request->input('notes', 'Barang mulus lolos inspeksi');
+        $request->validate([
+            'order_id'  => 'required',
+            'qc_status' => 'required|string|in:PASSED,FAILED,PASS,FAIL',
+            'notes'     => 'nullable|string',
+        ]);
 
-        $expeditionResult = null;
+        // Normalisasi order_id: jika dikirim angka biasa (misal "1" atau 1),
+        // ubah ke format ORD-001 agar selaras dengan Order Service
+        $rawOrderId = $request->input('order_id');
+        if (is_numeric($rawOrderId)) {
+            $orderId = 'ORD-' . str_pad((int) $rawOrderId, 3, '0', STR_PAD_LEFT);
+        } else {
+            $orderId = strtoupper(trim($rawOrderId));
+        }
 
-        // Jika status QC = PASS atau PASSED, panggil Expedition Service secara otomatis
-        if (in_array(strtoupper($qcStatus), ['PASS', 'PASSED'])) {
-            try {
-                // Tembak API milik Icha (Expedition Service)
-                $response = \Illuminate\Support\Facades\Http::withHeaders([
-                    'X-IAE-KEY' => '102022400313' // API Key milik Icha (NIM Icha)
-                ])->post('http://expedition-service:8000/api/v1/expeditions', [
-                    'order_id' => (int) $orderId,
-                    'customer_name' => $request->input('customer_name', 'Customer Group 03'),
-                    'customer_address' => $request->input('customer_address', 'Telkom University, Bandung'),
-                    'courier_name' => $request->input('courier_name', 'JNE Express'),
-                    'tracking_number' => $request->input('tracking_number', 'TRK-IAE-' . strtoupper(bin2hex(random_bytes(4)))),
-                    'shipping_status' => 'processing'
-                ]);
+        $qcStatus = strtoupper($request->input('qc_status'));
+        $notes    = $request->input('notes', '-');
 
-                if ($response->successful()) {
-                    $expeditionResult = $response->json();
-                } else {
-                    $expeditionResult = [
-                        'status' => 'error',
-                        'message' => 'Gagal membuat pengiriman. Respon Expedition: ' . $response->body()
-                    ];
-                }
-            } catch (\Exception $e) {
-                $expeditionResult = [
-                    'status' => 'error',
-                    'message' => 'Gagal menghubungi Expedition Service: ' . $e->getMessage()
-                ];
-            }
+        // Normalisasi status: PASS → PASSED, FAIL → FAILED
+        if ($qcStatus === 'PASS') $qcStatus = 'PASSED';
+        if ($qcStatus === 'FAIL') $qcStatus = 'FAILED';
+
+        // Kirim SOAP Audit ke server dosen
+        $iaeCloud      = app(\App\Services\IaeCloudService::class);
+        $receiptNumber = null;
+
+        $soapData = [
+            'order_id'     => $orderId,
+            'qc_status'    => $qcStatus,
+            'notes'        => $notes,
+            'processed_at' => now()->toIso8601String(),
+        ];
+
+        try {
+            $receiptNumber = $iaeCloud->sendSoapAudit('QCCompleted', $soapData);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('SOAP QC Audit gagal: ' . $e->getMessage());
+        }
+
+        // Publish event ke RabbitMQ: inventory.qc.completed
+        // Service lain (Expedition) yang kemudian merespons event ini secara mandiri
+        $rabbitPayload = [
+            'team_id'  => config('services.iae_cloud.team_id', 'TEAM-03'),
+            'service'  => 'Inventory-Service',
+            'activity' => 'QCCompleted',
+            'event'    => 'inventory.qc.completed',
+            'data'     => [
+                'order_id'       => $orderId,
+                'qc_status'      => $qcStatus,
+                'notes'          => $notes,
+                'receipt_number' => $receiptNumber,
+                'processed_at'   => now()->toIso8601String(),
+            ],
+        ];
+
+        $rabbitStatus = false;
+        try {
+            $rabbitStatus = $iaeCloud->publishRabbitMq('inventory.qc.completed', $rabbitPayload);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('RabbitMQ QC publish gagal: ' . $e->getMessage());
         }
 
         return response()->json([
-            'status' => 'success',
-            'message' => 'Memproses barang order sekaligus mencatat hasil QC',
+            'status'  => 'success',
+            'message' => 'Hasil QC berhasil dicatat. Notifikasi telah dikirim ke sistem.',
             'receipt' => [
-                'order_id' => $orderId,
-                'qc_status' => $qcStatus,
-                'notes' => $notes,
-                'processed_at' => now()->toDateTimeString()
+                'order_id'     => $orderId,
+                'qc_status'    => $qcStatus,
+                'notes'        => $notes,
+                'processed_at' => now()->toDateTimeString(),
             ],
-            'expedition' => $expeditionResult
+            'integration' => [
+                'soap_audit' => [
+                    'status'         => $receiptNumber ? 'success' : 'failed',
+                    'receipt_number' => $receiptNumber,
+                ],
+                'rabbitmq' => [
+                    'status' => $rabbitStatus ? 'success' : 'failed',
+                    'event'  => 'inventory.qc.completed',
+                ],
+            ],
         ], 201);
     }
 
@@ -171,7 +216,7 @@ class InventoryController extends Controller
 
         try {
             $receiptNumber = $this->soapService->sendAudit(
-                'TEAM-25', 
+                'TEAM-03', 
                 'UpdateInventory', 
                 json_encode($data)
             );

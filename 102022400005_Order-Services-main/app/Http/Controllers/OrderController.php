@@ -16,15 +16,15 @@ use Illuminate\Routing\Controllers\Middleware;
     title: "Order Service API"
 )]
 #[OA\Server(
-    url: "http://localhost:3000",
-    description: "Server Lokal (Development)"
+    url: "http://localhost:8000",
+    description: "API Gateway Nginx"
 )]
 #[OA\SecurityScheme(
     securityScheme: "ApiKeyAuth",
     type: "apiKey",
     name: "X-IAE-KEY",
     in: "header",
-    description: "Kunci otentikasi API Key berupa NIM Anda dikirim lewat header X-IAE-KEY (Contoh: 102022400005)."
+    description: "Kunci otentikasi API Key berupa NIM Anda dikirim lewat header X-IAE-KEY."
 )]
 #[OA\SecurityScheme(
     securityScheme: "BearerAuth",

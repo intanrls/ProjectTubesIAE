@@ -36,10 +36,11 @@ return [
     ],
 
     'iae_cloud' => [
-    'base_url' => env('IAE_CLOUD_URL', 'https://iae-sso.virtualfri.id'),
-    'api_key' => env('IAE_API_KEY'),
-    'team_id' => env('IAE_TEAM_ID', 'TEAM-03'),
-    'exchange' => env('IAE_EXCHANGE', 'iae.central.exchange'),
-],
+        'base_url' => env('IAE_CLOUD_URL', 'https://iae-sso.virtualfri.id'),
+        'api_key' => env('IAE_API_KEY', 'KEY-MHS-367'),
+        'nim' => env('IAE_NIM', '102022400313'),
+        'team_id' => env('IAE_TEAM_ID', 'TEAM-03'),
+        'exchange' => env('IAE_EXCHANGE', 'iae.central.exchange'),
+    ],
 
 ];

@@ -8,6 +8,7 @@ class IaeCloudService
 {
     protected string $baseUrl;
     protected string $apiKey;
+    protected string $nim;
     protected string $teamId;
     protected string $exchange;
 
@@ -15,6 +16,7 @@ class IaeCloudService
     {
         $this->baseUrl = config('services.iae_cloud.base_url');
         $this->apiKey = config('services.iae_cloud.api_key');
+        $this->nim = config('services.iae_cloud.nim');
         $this->teamId = config('services.iae_cloud.team_id');
         $this->exchange = config('services.iae_cloud.exchange');
     }
@@ -22,8 +24,9 @@ class IaeCloudService
     public function getToken(): ?string
     {
         $response = Http::withoutVerifying()->post($this->baseUrl . '/api/v1/auth/token', [
-    'api_key' => $this->apiKey,
-]);
+            'api_key' => $this->apiKey,
+            'nim' => $this->nim,
+        ]);
 
         if (!$response->successful()) {
             return null;
@@ -68,9 +71,26 @@ XML;
             return null;
         }
 
-        preg_match('/<iae:ReceiptNumber>(.*?)<\/iae:ReceiptNumber>/', $response->body(), $matches);
+        $xmlResult = $response->body();
+        $receiptNumber = null;
 
-        return $matches[1] ?? null;
+        try {
+            $cleanXml = str_ireplace(['soap:', 'iae:'], '', $xmlResult);
+            $xmlElement = simplexml_load_string($cleanXml);
+            $receiptNumber = (string) ($xmlElement->Body->AuditResponse->ReceiptNumber ?? '');
+        } catch (\Exception $e) {
+            // Fallback to regex on XML parse error
+        }
+
+        if (empty($receiptNumber)) {
+            if (preg_match('/<iae:ReceiptNumber>(.*?)<\/iae:ReceiptNumber>/s', $xmlResult, $matches)) {
+                $receiptNumber = trim($matches[1]);
+            } elseif (preg_match('/<ReceiptNumber>(.*?)<\/ReceiptNumber>/s', $xmlResult, $matches)) {
+                $receiptNumber = trim($matches[1]);
+            }
+        }
+
+        return empty($receiptNumber) ? null : $receiptNumber;
     }
 
     public function publishRabbitMq(array $expedition): bool

@@ -11,6 +11,9 @@ services:
       - order-service
       - inventory-service
       - expedition-service
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     networks:
       - fulfillment-network
 
@@ -18,8 +21,9 @@ services:
     build:
       context: ./102022400005_Order-Services-main
     container_name: order-service
-    ports:
-      - "3000:3000"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     networks:
       - fulfillment-network
 
@@ -27,8 +31,9 @@ services:
     build:
       context: ./102022400047_inventory-service-main
     container_name: inventory-service
-    ports:
-      - "8081:80"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     networks:
       - fulfillment-network
 
@@ -36,8 +41,9 @@ services:
     build:
       context: ./102022400313_Expedition-Service-main
     container_name: expedition-service
-    ports:
-      - "8082:8000"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     networks:
       - fulfillment-network
 
