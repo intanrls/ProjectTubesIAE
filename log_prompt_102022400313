@@ -1,0 +1,69 @@
+# Prompt Log
+
+## Identitas
+
+| Keterangan    | Detail                        |
+| ------------- | ----------------------------- |
+| Nama          | Meilisya Nabila Siregar       |
+| NIM           | 102022400313                  |
+| Mata Kuliah   | Integrasi Aplikasi Enterprise |
+| Service       | Expedition Service            |
+| Team          | TEAM-03                       |
+
+
+## Daftar Prompt
+
+### Prompt 1
+
+Cara bikin Dockerfile Laravel yang cocok buat Expedition Service gimana ya? Biar nanti gampang digabung ke Docker Compose kelompok
+
+
+### Prompt 2
+
+Kalau nanti tiga service digabung pake Docker Compose, konfigurasi apa aja yang perlu diubah di masing-masing service biar bisa saling komunikasi?
+
+
+### Prompt 3
+
+Kalau nanti semua request masuk lewat API Gateway, Expedition Service-ku perlu penyesuaian apa aja biar tetap bisa jalan end-to-end?
+
+
+### Prompt 4
+
+Menurutmu komunikasi antar Order Service, Inventory Service, sama Expedition Service lebih cocok pakai REST API atau RabbitMQ? Kenapa?
+
+
+### Prompt 5
+
+Kalau Order Service udah selesai bikin order, data apa aja yang sebaiknya dikirim ke Inventory Service? Terus setelah QC selesai, data apa aja yang perlu dikirim ke Expedition Service?
+
+
+### Prompt 6
+
+Dosenku nambahin parameter `nim` buat request M2M ke SSO. Bagian coding mana aja yang harus ku ubah biar integrasinya tetap jalan?
+
+
+### Prompt 7
+
+Alur komunikasi antar ketiga service kelompokku udah realistis belum? Apa masih ada proses bisnis yang perlu ditambah atau diubah biar lebih sesuai?
+
+
+### Prompt 8
+
+Cara ngetes kalau alur Order ke Inventory ke Expedition udah benar-benar jalan end-to-end gimana ya? Skenario testing apa aja yang sebaiknya dicoba?
+
+
+### Prompt 9
+
+Review keseluruhan arsitektur kelompok kami. Dari REST API, API Gateway, Docker, SSO, SOAP Audit, RabbitMQ, sampai komunikasi antar service, masih ada yang kurang sesuai sama rubrik penilaian ga?
+
+
+### Prompt 10
+
+Cara cek kalau Docker Compose, API Gateway, sama ketiga service udah berhasil jalan bareng tanpa ada masalah komunikasi antar container gimana ya?
+
+
+## Penutup
+
+Seluruh prompt di atas digunakan sebagai dokumentasi proses pemanfaatan AI dalam membantu analisis, implementasi, debugging, dan evaluasi integrasi **Expedition Service** pada Tugas Besar mata kuliah **Integrasi Aplikasi Enterprise**. AI dimanfaatkan sebagai pendukung proses pembelajaran untuk memahami konsep integrasi microservice, Docker, API Gateway, Federated SSO, SOAP XML, RabbitMQ, serta pengujian end-to-end, sedangkan implementasi akhir tetap disesuaikan dengan kebutuhan sistem yang dikembangkan.
+
